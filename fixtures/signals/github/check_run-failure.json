@@ -1,0 +1,16 @@
+{
+  "action": "completed",
+  "check_run": {
+    "conclusion": "failure",
+    "name": "Vercel",
+    "html_url": "https://github.com/owner/my-app/runs/12345",
+    "output": {
+      "title": "Build failed",
+      "summary": "Module not found: Can't resolve 'lodash'"
+    },
+    "completed_at": "2024-01-15T16:05:00Z"
+  },
+  "repository": {
+    "full_name": "owner/my-app"
+  }
+}

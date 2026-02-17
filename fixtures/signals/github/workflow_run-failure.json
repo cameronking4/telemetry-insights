@@ -1,0 +1,12 @@
+{
+  "action": "completed",
+  "workflow_run": {
+    "conclusion": "failure",
+    "name": "CI",
+    "html_url": "https://github.com/owner/my-app/actions/runs/67890",
+    "created_at": "2024-01-15T16:10:00Z"
+  },
+  "repository": {
+    "full_name": "owner/my-app"
+  }
+}

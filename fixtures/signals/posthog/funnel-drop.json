@@ -1,0 +1,5 @@
+{
+  "source": "posthog",
+  "funnel_id": "signup_funnel",
+  "drop_pct": 0.15
+}

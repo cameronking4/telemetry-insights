@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "timestamp": "2024-01-15T14:31:00Z",
+      "level": "error",
+      "message": "NullPointerException in PaymentService.validate()",
+      "service": "api"
+    },
+    {
+      "timestamp": "2024-01-15T14:31:05Z",
+      "level": "error",
+      "message": "PaymentService.validate() at line 42: null reference",
+      "service": "api"
+    },
+    {
+      "timestamp": "2024-01-15T14:32:00Z",
+      "level": "error",
+      "message": "500 Internal Server Error on POST /payments",
+      "service": "api"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "name": "@devinnn/incident-triage",
+  "version": "0.1.0",
+  "description": "AI-driven incident triage: Alert → Devin → Root-cause report + telemetry PRs",
+  "main": "dist/src/index.js",
+  "bin": {
+    "incident-triage": "dist/src/cli.js"
+  },
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "dist/src",
+    "incident-triage.schema.json"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "incident-triage": "tsx src/cli.ts"
+  },
+  "dependencies": {
+    "@octokit/rest": "^21.1.1",
+    "dotenv": "^16.4.5",
+    "js-yaml": "^4.1.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.13.4",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "source": "deploy",
+  "provider": "vercel",
+  "deployment_id": "dpl_abc123",
+  "repo": "owner/my-app",
+  "branch": "main",
+  "error_message": "Build failed: Module not found: Error: Can't resolve 'lodash' in '/var/task/src'"
+}

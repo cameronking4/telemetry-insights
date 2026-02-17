@@ -1,0 +1,16 @@
+{
+  "entries": [
+    {
+      "timestamp": "2024-01-15T16:00:00Z",
+      "level": "error",
+      "message": "Build failed: Module not found: Error: Can't resolve 'lodash' in '/var/task/src'",
+      "service": "build"
+    },
+    {
+      "timestamp": "2024-01-15T16:00:01Z",
+      "level": "error",
+      "message": "npm run build exited with code 1",
+      "service": "build"
+    }
+  ]
+}

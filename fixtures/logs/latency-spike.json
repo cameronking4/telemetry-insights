@@ -1,0 +1,16 @@
+{
+  "entries": [
+    {
+      "timestamp": "2024-01-15T14:34:00Z",
+      "level": "warn",
+      "message": "Slow query: SELECT * FROM orders WHERE ... (2.3s)",
+      "service": "api"
+    },
+    {
+      "timestamp": "2024-01-15T14:35:00Z",
+      "level": "warn",
+      "message": "Request timeout after 2000ms",
+      "service": "api"
+    }
+  ]
+}

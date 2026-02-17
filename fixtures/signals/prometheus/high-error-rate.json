@@ -1,0 +1,35 @@
+{
+  "version": "4",
+  "groupKey": "{}:{alertname=\"HighErrorRate\"}",
+  "status": "firing",
+  "receiver": "default",
+  "groupLabels": { "alertname": "HighErrorRate" },
+  "commonLabels": {
+    "alertname": "HighErrorRate",
+    "severity": "critical",
+    "service": "api"
+  },
+  "commonAnnotations": {
+    "summary": "High error rate on api",
+    "description": "Error rate is above 5% for the last 5 minutes"
+  },
+  "externalURL": "http://alertmanager:9093",
+  "alerts": [
+    {
+      "status": "firing",
+      "labels": {
+        "alertname": "HighErrorRate",
+        "severity": "critical",
+        "service": "api",
+        "instance": "api:8080"
+      },
+      "annotations": {
+        "summary": "High error rate on api",
+        "description": "Error rate is above 5% for the last 5 minutes"
+      },
+      "startsAt": "2024-01-15T14:32:00Z",
+      "endsAt": "0001-01-01T00:00:00Z",
+      "generatorURL": "http://prometheus:9090/graph"
+    }
+  ]
+}

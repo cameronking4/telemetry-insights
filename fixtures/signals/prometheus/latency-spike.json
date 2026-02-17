@@ -1,0 +1,34 @@
+{
+  "version": "4",
+  "groupKey": "{}:{alertname=\"LatencySpike\"}",
+  "status": "firing",
+  "receiver": "default",
+  "groupLabels": { "alertname": "LatencySpike" },
+  "commonLabels": {
+    "alertname": "LatencySpike",
+    "severity": "warning",
+    "service": "api"
+  },
+  "commonAnnotations": {
+    "summary": "P99 latency above 2s",
+    "description": "P99 latency has exceeded 2000ms for 5 minutes"
+  },
+  "externalURL": "http://alertmanager:9093",
+  "alerts": [
+    {
+      "status": "firing",
+      "labels": {
+        "alertname": "LatencySpike",
+        "severity": "warning",
+        "service": "api"
+      },
+      "annotations": {
+        "summary": "P99 latency above 2s",
+        "description": "P99 latency has exceeded 2000ms for 5 minutes"
+      },
+      "startsAt": "2024-01-15T14:35:00Z",
+      "endsAt": "0001-01-01T00:00:00Z",
+      "generatorURL": "http://prometheus:9090/graph"
+    }
+  ]
+}

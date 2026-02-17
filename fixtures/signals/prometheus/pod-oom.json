@@ -1,0 +1,35 @@
+{
+  "version": "4",
+  "groupKey": "{}:{alertname=\"PodOOM\"}",
+  "status": "firing",
+  "receiver": "default",
+  "groupLabels": { "alertname": "PodOOM" },
+  "commonLabels": {
+    "alertname": "PodOOM",
+    "severity": "critical",
+    "service": "worker"
+  },
+  "commonAnnotations": {
+    "summary": "Pod running out of memory",
+    "description": "Container memory usage above 90%"
+  },
+  "externalURL": "http://alertmanager:9093",
+  "alerts": [
+    {
+      "status": "firing",
+      "labels": {
+        "alertname": "PodOOM",
+        "severity": "critical",
+        "service": "worker",
+        "pod": "worker-7d8f9b-xyz"
+      },
+      "annotations": {
+        "summary": "Pod running out of memory",
+        "description": "Container memory usage above 90%"
+      },
+      "startsAt": "2024-01-15T15:00:00Z",
+      "endsAt": "0001-01-01T00:00:00Z",
+      "generatorURL": "http://prometheus:9090/graph"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+name: Incident Triage
+
+on:
+  workflow_dispatch:
+    inputs:
+      payload_file:
+        description: "Path to JSON payload file (optional)"
+        required: false
+  repository_dispatch:
+    types: [incident-triage]
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Run incident triage
+        env:
+          DEVIN_API_KEY: ${{ secrets.DEVIN_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -n "${{ github.event.inputs.payload_file }}" ]; then
+            node dist/src/cli.js run --payload "${{ github.event.inputs.payload_file }}"
+          elif [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            echo '${{ toJSON(github.event.client_payload) }}' > /tmp/payload.json
+            node dist/src/cli.js run --payload /tmp/payload.json
+          else
+            node dist/src/cli.js run --demo high-error-rate
+          fi

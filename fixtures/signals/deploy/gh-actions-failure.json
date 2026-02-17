@@ -1,0 +1,7 @@
+{
+  "source": "deploy",
+  "provider": "github",
+  "repo": "owner/my-app",
+  "branch": "main",
+  "error_message": "Workflow 'CI' failed: npm run test exited with code 1"
+}
