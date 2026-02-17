@@ -1,0 +1,59 @@
+---
+title: Signals
+description: Trigger sources and payload formats
+---
+
+# Signals
+
+Signals are the triggers that start a triage run. We support four kinds, each normalized to a single **IncidentPayload** type.
+
+## IncidentPayload (normalized)
+
+Every signal is parsed into:
+
+- **id** — Unique incident id (e.g. `inc-<timestamp>-<random>`)
+- **trigger** — `prometheus` | `posthog` | `deploy` | `github`
+- **startsAt** — ISO timestamp (from alert or event)
+- **labels** — Key/value from alert or event (e.g. service, severity, repo)
+- **annotations** — Extra context (e.g. description, target_url, error_message)
+- **raw** — Original payload (for debugging or forwarding)
+
+## Prometheus (Alertmanager v4)
+
+- **When:** Webhook from Prometheus Alertmanager; we only trigger on **firing** alerts.
+- **Format:** [Alertmanager v4](https://prometheus.io/docs/alerting/latest/notification_examples/) — `version`, `status`, `alerts[]` with `labels`, `annotations`, `startsAt`.
+- **Config:** `signals.prometheus.enabled`, `signals.prometheus.labelFilters` (e.g. `severity: critical`).
+- **Fixture:** `fixtures/signals/prometheus/*.json`
+
+## PostHog (funnel regression)
+
+- **When:** Custom webhook (e.g. from Zapier/Make) when a funnel conversion drops.
+- **Format:** `{ source: "posthog", funnel_id, drop_pct }`.
+- **Config:** `signals.posthog.enabled`, optional `funnelDropThreshold`.
+- **Fixture:** `fixtures/signals/posthog/funnel-drop.json`
+
+## Deploy (generic)
+
+- **When:** Any POST that sends a deploy-failure payload.
+- **Format:** `{ source: "deploy", provider?, repo?, branch?, error_message?, ... }`.
+- **Config:** `signals.deploy.enabled`, optional `providers` list.
+- **Fixture:** `fixtures/signals/deploy/vercel-build-failure.json`, `gh-actions-failure.json`
+
+## GitHub (native events)
+
+- **When:** Repo webhook sends `deployment_status`, `check_run`, or `workflow_run`; we trigger only on **failure/error**.
+- **Events:**
+  - **deployment_status** — `state === "error" | "failure"` (e.g. Vercel build failures shown on GitHub)
+  - **check_run** — `conclusion === "failure"`
+  - **workflow_run** — `conclusion === "failure"`
+- **Config:** `signals.github.enabled`, optional `events` list.
+- **Endpoint:** `POST /webhook/github`; server reads `X-GitHub-Event` and parses the body accordingly.
+- **Fixture:** `fixtures/signals/github/deployment_status-failure.json`, `check_run-failure.json`, `workflow_run-failure.json`
+
+## Routing
+
+- **GitHub:** If the request has `X-GitHub-Event`, we use the GitHub parser for that event type.
+- **Prometheus:** If body has `version` and `alerts`, we use the Prometheus parser.
+- **PostHog / Deploy:** If body has `source === "posthog"` or `source === "deploy"`, we use the corresponding parser.
+
+Only one parser runs per request; the result is a single IncidentPayload (or null if the event shouldn’t trigger triage, e.g. resolved alert or success conclusion).

@@ -1,0 +1,113 @@
+---
+title: Quick Start
+description: Run your first triage in minutes
+---
+
+# Quick Start
+
+Get Incident Triage running locally with demos and fixtures—no Prometheus or production traffic required.
+
+## Prerequisites
+
+- **Node.js 20+**
+- **Git** (optional; used for commits when running in a repo)
+- **Devin API key** — [Devin](https://devin.ai) account; create an API key for sessions
+
+## 1. Install
+
+```bash
+git clone <your-incident-triage-repo>
+cd incident-triage
+npm install
+npm run build
+```
+
+## 2. Configure environment
+
+Create a `.env` file in the project root:
+
+```bash
+# Required for running triage (Devin sessions)
+DEVIN_API_KEY=your_devin_api_key
+
+# Optional: for fetching commits from private repos via GitHub API
+GITHUB_TOKEN=your_github_token
+```
+
+## 3. Validate config (optional)
+
+Copy the example config and validate it:
+
+```bash
+cp incident-triage.yaml.example incident-triage.yaml
+npm run validate
+```
+
+## 4. Run a demo
+
+List available demos:
+
+```bash
+npm run demo
+```
+
+Run a specific scenario (each triggers a real Devin session; ~10–12 min typical):
+
+```bash
+npm run demo:high-error-rate
+npm run demo:latency-spike
+npm run demo:deploy-failure
+```
+
+You'll see "Still waiting for Devin…" while the session runs. When it finishes, the CLI prints:
+
+- **Session** — URL to the Devin run
+- **Report** — Path to `.incident-triage/reports/<incident_id>.md`
+- **PR** — Link if Devin opened a patch or telemetry PR
+
+## 5. Run with a fixture
+
+List fixtures:
+
+```bash
+npm run fixture
+```
+
+Run by fixture name (use `--` so npm passes flags):
+
+```bash
+npm run incident-triage -- run --fixture high-error-rate
+npm run incident-triage -- run --fixture deployment_status-failure
+```
+
+## 6. Check reports
+
+Reports are written to `.incident-triage/reports/`:
+
+```bash
+ls -la .incident-triage/reports/
+cat .incident-triage/reports/inc-*.md
+```
+
+## 7. Optional: start the webhook server
+
+To trigger triage via HTTP (e.g. from Prometheus or GitHub):
+
+```bash
+npm run webhook
+# Or custom port:
+npm run incident-triage -- webhook-server --port 8080
+```
+
+Endpoints:
+
+- `POST /webhook/prometheus` — Alertmanager v4 payload
+- `POST /webhook/deploy` — Generic deploy payload
+- `POST /webhook/posthog` — PostHog-style payload
+- `POST /webhook/github` — GitHub events (set `X-GitHub-Event`: deployment_status, check_run, workflow_run)
+
+## Next steps
+
+- [Configuration](/docs/config-reference) — Full `incident-triage.yaml` reference
+- [CLI Reference](/docs/cli-reference) — All commands and options
+- [Architecture](/docs/architecture) — Data flow and components

@@ -1,0 +1,105 @@
+---
+title: CLI Reference
+description: All commands and options
+---
+
+# CLI Reference
+
+Entry point: **incident-triage** (or `npm run incident-triage` with `--` for flags, or the convenience scripts below).
+
+## Commands
+
+### `validate [configPath]`
+
+Validates `incident-triage.yaml` (or the given path). Exits 0 if valid, 1 with message if invalid or missing.
+
+```bash
+npm run validate
+npm run incident-triage -- validate
+npm run incident-triage -- validate /path/to/incident-triage.yaml
+```
+
+### `run`
+
+Runs the full triage flow: normalize → upload evidence → Devin session → report. Requires **DEVIN_API_KEY** in env (or `.env`).
+
+#### Options
+
+| Option | Description |
+|--------|-------------|
+| `--demo [name]` | Use a built-in demo. If `name` is omitted, lists demos. |
+| `--fixture <name>` | Use a fixture by name. If `name` is omitted, lists fixtures. |
+| `--payload <path>` | Use a raw JSON payload file (e.g. webhook body). |
+
+#### Examples
+
+```bash
+# List demos
+npm run demo
+npm run incident-triage -- run --demo
+
+# Run a demo (takes ~10–12 min; uses Devin)
+npm run demo:high-error-rate
+npm run demo:latency-spike
+npm run demo:deploy-failure
+npm run incident-triage -- run --demo high-error-rate
+
+# List fixtures
+npm run fixture
+npm run incident-triage -- run --fixture
+
+# Run by fixture name
+npm run incident-triage -- run --fixture high-error-rate
+npm run incident-triage -- run --fixture deployment_status-failure
+
+# Run with custom payload
+npm run incident-triage -- run --payload ./payload.json
+```
+
+When using **npm run**, use `--` before flags so npm doesn’t consume them (e.g. `npm run incident-triage -- run --fixture high-error-rate`).
+
+### `status`
+
+Lists recent Devin sessions with tag `incident-triage` (e.g. last 20). Requires **DEVIN_API_KEY**.
+
+```bash
+npm run status
+npm run incident-triage -- status
+```
+
+### `webhook-server [--port <port>]`
+
+Starts the HTTP webhook server. Default port **3000**. Requires **DEVIN_API_KEY** for triage; responds 200 quickly and runs triage asynchronously.
+
+```bash
+npm run webhook
+npm run incident-triage -- webhook-server
+npm run incident-triage -- webhook-server --port 8080
+```
+
+Endpoints:
+
+- `POST /webhook/prometheus` — Alertmanager v4
+- `POST /webhook/deploy` — Generic deploy payload
+- `POST /webhook/posthog` — PostHog-style payload
+- `POST /webhook/github` — GitHub events (use `X-GitHub-Event` header)
+
+## NPM scripts (no `--` needed)
+
+| Script | Effect |
+|--------|--------|
+| `npm run demo` | List demos |
+| `npm run demo:high-error-rate` | Run high-error-rate demo |
+| `npm run demo:latency-spike` | Run latency-spike demo |
+| `npm run demo:deploy-failure` | Run deploy-failure demo |
+| `npm run fixture` | List fixtures |
+| `npm run validate` | Validate config |
+| `npm run status` | List sessions |
+| `npm run webhook` | Start webhook server |
+
+## Exit codes
+
+- **0** — Success
+- **1** — Invalid config, missing DEVIN_API_KEY, parse error, or Devin/session error
+
+Reports are written to `config.outputs.reportPath` (default: `.incident-triage/reports/<incident_id>.md`).

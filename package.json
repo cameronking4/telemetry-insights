@@ -17,7 +17,15 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "vitest run",
-    "incident-triage": "tsx src/cli.ts"
+    "incident-triage": "tsx src/cli.ts",
+    "demo": "tsx src/cli.ts run --demo",
+    "demo:high-error-rate": "tsx src/cli.ts run --demo high-error-rate",
+    "demo:latency-spike": "tsx src/cli.ts run --demo latency-spike",
+    "demo:deploy-failure": "tsx src/cli.ts run --demo deploy-failure",
+    "fixture": "tsx src/cli.ts run --fixture",
+    "validate": "tsx src/cli.ts validate",
+    "status": "tsx src/cli.ts status",
+    "webhook": "tsx src/cli.ts webhook-server"
   },
   "dependencies": {
     "@octokit/rest": "^21.1.1",

@@ -1,0 +1,43 @@
+---
+title: Goals
+description: What Incident Triage optimizes for
+---
+
+# Goals
+
+We optimize for these outcomes and constraints.
+
+## 1. Compress time-to-root-cause
+
+- **Goal:** Reduce the 30+ minutes engineers spend gathering logs, diffs, and context before they can hypothesize.
+- **How:** One flow from alert → structured evidence → AI triage → report (and optional PRs). Evidence is packaged once and sent to Devin; no manual log/diff hunting for the first pass.
+
+## 2. Human in the loop, always
+
+- **Goal:** Every remediation decision is approved by a human. No auto-merge, no auto-remediation.
+- **How:** Outputs are a markdown report and optional PRs. Devin can open PRs; your team reviews and merges.
+
+## 3. Event-driven, webhook-first
+
+- **Goal:** Trigger triage from the systems you already use (Prometheus, GitHub, Vercel, PostHog) without polling.
+- **How:** Webhook server with dedicated routes; GitHub native events (deployment_status, check_run, workflow_run) so Vercel/GHA failures shown on GitHub can trigger triage automatically.
+
+## 4. Fixture-first POC
+
+- **Goal:** Validate the full loop without real traffic or a live app.
+- **How:** Baked fixtures for signals and logs; `run --demo` and `run --fixture`; real git for commits when run in a repo. Ship the POC first; wire real webhooks when ready.
+
+## 5. One evidence bundle, one schema
+
+- **Goal:** Devin gets a single, consistent view of the incident (metadata, commits, logs) and returns one structured triage result.
+- **How:** Normalizer produces one `evidence.json`; one Devin session with one playbook and one schema (root cause, confidence, action, telemetry gaps, optional PR URL).
+
+## 6. Telemetry improvement as a first-class output
+
+- **Goal:** Surface missing counters, spans, and logs so the next incident is easier to triage.
+- **How:** Playbook asks Devin to list missing telemetry and optional telemetry-improvement PRs; config can enable/disable creating those PRs.
+
+## Success Criteria (from PRD)
+
+- **POC:** `incident-triage run --demo` produces a triage report that correctly identifies cause and telemetry gaps from fixture data.
+- **Product:** Reduction in time-to-root-cause; % of incidents where AI suggests the correct service in the top 2; % of telemetry PRs accepted.

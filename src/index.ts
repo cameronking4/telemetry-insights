@@ -10,7 +10,6 @@ import {
 import { TriageReportSchema } from "./devin/schemas";
 import { buildTriagePlaybookPrompt } from "./devin/prompts";
 import { writeTriageReport } from "./outputs/triage-report";
-import { buildEvidenceBundle } from "./evidence/bundle";
 import type { IncidentPayload } from "./signals/types";
 import type { IncidentTriageConfig } from "./config/schema";
 
@@ -53,8 +52,8 @@ export async function runTriage(
       options.logsScenario ?? incident.labels?.service ?? "high-error-rate",
   });
 
-  const { archivePath } = await buildEvidenceBundle(dirPath, incident);
-  const attachmentUrl = await devinUploadAttachment(apiKey, archivePath);
+  // Upload evidence.json directly (no tar.gz bundling)
+  const attachmentUrl = await devinUploadAttachment(apiKey, evidencePath);
 
   const prompt = buildTriagePlaybookPrompt({
     incident,

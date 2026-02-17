@@ -1,0 +1,117 @@
+---
+title: Development
+description: Setup and contributing
+---
+
+# Development
+
+How to run, build, and extend Incident Triage locally.
+
+## Prerequisites
+
+- **Node.js 20+**
+- **npm** (or pnpm/yarn)
+- **Git** (for commit fetching in normalizer)
+
+## Clone and install
+
+```bash
+git clone <repo-url>
+cd incident-triage
+npm install
+```
+
+## Build
+
+```bash
+npm run build
+```
+
+Output is in **dist/** (TypeScript compiled to JavaScript). The CLI entry is **dist/src/cli.js**.
+
+## Run locally (development)
+
+Use **tsx** so you don’t need to rebuild after every change:
+
+```bash
+# From project root; load .env from root
+npx tsx src/cli.ts validate
+npx tsx src/cli.ts run --demo high-error-rate
+npx tsx src/cli.ts status
+npx tsx src/cli.ts webhook-server --port 3000
+```
+
+Or use the npm scripts (they use `tsx src/cli.ts`):
+
+```bash
+npm run validate
+npm run demo:high-error-rate
+npm run status
+npm run webhook
+```
+
+## Env
+
+Create **.env** in the project root:
+
+```bash
+DEVIN_API_KEY=your_key
+GITHUB_TOKEN=optional_for_private_repos
+```
+
+**dotenv** is loaded when the CLI starts (if the dependency is present).
+
+## Tests
+
+```bash
+npm test
+```
+
+(Uses Vitest; add tests under **test/** or **src/** `*.test.ts` as needed.)
+
+## Codebase layout
+
+See [Project structure](/docs/project-structure). Main areas:
+
+- **src/config** — Schema (Zod), load, validate
+- **src/signals** — Parsers and normalize
+- **src/normalizer** — Commits, logs, package
+- **src/devin** — v1 client, schemas, prompts
+- **src/outputs** — Triage report writer
+- **src/evidence** — (Optional bundle logic; we currently upload evidence.json only)
+- **src/github** — parseRepo, getCommitComparison
+- **src/webhook** — HTTP server and routes
+- **src/cli.ts** — CLI entry
+- **src/index.ts** — Public API (runTriage, validateConfig, etc.)
+
+## Adding a new signal type
+
+1. Add a parser in **src/signals/** (e.g. `mysource.ts`) that returns `IncidentPayload | null`.
+2. In **src/signals/normalize.ts**, add routing (e.g. by header or body field) and call the new parser.
+3. Add **TriggerKind** in **src/signals/types.ts** if needed.
+4. Add config in **src/config/schema.ts** and document in [Config reference](/docs/config-reference).
+5. Add a webhook route in **src/webhook/server.ts** if the trigger is HTTP.
+
+## Adding a new logs adapter
+
+1. Implement the adapter (e.g. **src/normalizer/logs-datadog.ts**) that returns `LogsResult`.
+2. In **src/normalizer/logs.ts** (or a dispatcher), choose adapter by config (e.g. `normalizer.logsAdapter: "datadog"`).
+3. Extend config schema and docs.
+
+## Docs site (Fumadocs)
+
+The **docs/** folder is a separate Next.js + Fumadocs app. To run it:
+
+```bash
+cd docs
+npm install
+npm run dev
+```
+
+Content lives in **docs/content/docs/** (MDX + meta.json). Edit MDX and refresh the browser.
+
+## Releasing
+
+- Bump **version** in **package.json**.
+- Ensure **npm run build** and **npm test** pass.
+- Publish with **npm publish** (if public) or your registry workflow. The **bin** entry is **incident-triage** → **dist/src/cli.js**; **files** should include **dist/src** and any schema JSON.

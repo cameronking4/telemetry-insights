@@ -1,0 +1,111 @@
+---
+title: Configuration Reference
+description: incident-triage.yaml and options
+---
+
+# Configuration Reference
+
+Config is read from **incident-triage.yaml** in the project root (or a path you pass). Demos can run with **defaults** when no file is present.
+
+## Full example
+
+```yaml
+version: 1
+
+devin:
+  apiVersion: v1
+  unlisted: true
+  maxAcuLimit: 3
+  tags: [incident-triage]
+
+signals:
+  prometheus:
+    enabled: true
+    labelFilters: { severity: critical }
+  posthog:
+    enabled: false
+    funnelDropThreshold: 0.1
+  deploy:
+    enabled: true
+    providers: [vercel, github]
+  github:
+    enabled: true
+    events: [deployment_status, check_run, workflow_run]
+
+services:
+  - name: api
+    repo: owner/repo
+    paths: [src/api]
+
+normalizer:
+  timeWindowMinutes: 30
+  commitDepth: 10
+  logsAdapter: file
+  dashboards:
+    urlTemplate: "https://grafana.example.com/d/{dashboard_id}?var-service={{service}}"
+
+outputs:
+  createPatchPr: false
+  createTelemetryPr: false
+  requireHumanReview: true
+  reportPath: .incident-triage/reports
+```
+
+## Sections
+
+### `version`
+
+- **Required.** Must be `1`.
+
+### `devin`
+
+- **apiVersion** — `v1` (Devin API).
+- **unlisted** — Whether sessions are unlisted (default: true).
+- **maxAcuLimit** — Max ACU per session (default: 3).
+- **tags** — Tags attached to sessions (default: `["incident-triage"]`).
+
+### `signals`
+
+- **prometheus.enabled** — Accept Prometheus webhooks (default: true).
+- **prometheus.labelFilters** — Optional map; only firing alerts matching all entries trigger (e.g. `severity: critical`).
+- **posthog.enabled** — Accept PostHog-style webhooks (default: false).
+- **posthog.funnelDropThreshold** — Optional threshold for funnel drop.
+- **deploy.enabled** — Accept generic deploy webhooks (default: true).
+- **deploy.providers** — Optional list (e.g. vercel, github).
+- **github.enabled** — Accept GitHub native webhooks (default: true).
+- **github.events** — Optional list: `deployment_status`, `check_run`, `workflow_run`.
+
+### `services`
+
+- List of **name**, **repo** (e.g. `owner/repo`), **paths** (optional). Used for commit context and repo URL in the Devin prompt. No PR creation by the app.
+
+### `normalizer`
+
+- **timeWindowMinutes** — Time window around incident (default: 30).
+- **commitDepth** — How many commits to include (default: 10).
+- **logsAdapter** — `file` (fixture or user-placed file).
+- **dashboards.urlTemplate** — Optional URL template for dashboard links (e.g. Grafana). Not yet used at runtime; reserved for future use.
+
+### `outputs`
+
+- **createPatchPr** — Whether to ask Devin to open a patch PR (default: false for POC).
+- **createTelemetryPr** — Whether to ask Devin to open a telemetry PR (default: false).
+- **requireHumanReview** — Intent flag; all outputs are for human review.
+- **reportPath** — Directory for markdown reports (default: `.incident-triage/reports`).
+
+## Environment
+
+- **DEVIN_API_KEY** — Required for running triage (Devin sessions).
+- **GITHUB_TOKEN** — Optional; used when fetching commits from private repos via GitHub API.
+
+## Validation
+
+Run:
+
+```bash
+npm run validate
+# or
+npm run incident-triage -- validate [path/to/incident-triage.yaml]
+```
+
+Invalid YAML or schema errors are reported and exit with non-zero.

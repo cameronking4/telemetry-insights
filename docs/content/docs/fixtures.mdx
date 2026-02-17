@@ -1,0 +1,56 @@
+---
+title: Fixtures
+description: Demo and fixture layout for POC
+---
+
+# Fixtures
+
+Fixtures let you run the full triage flow **without** Prometheus or production traffic. Signals and logs are loaded from the repo.
+
+## Layout
+
+```
+fixtures/
+├── signals/
+│   ├── prometheus/
+│   │   ├── high-error-rate.json
+│   │   ├── latency-spike.json
+│   │   └── pod-oom.json
+│   ├── deploy/
+│   │   ├── vercel-build-failure.json
+│   │   └── gh-actions-failure.json
+│   ├── github/
+│   │   ├── deployment_status-failure.json
+│   │   ├── check_run-failure.json
+│   │   └── workflow_run-failure.json
+│   └── posthog/
+│       └── funnel-drop.json
+└── logs/
+    ├── high-error-rate.json
+    ├── latency-spike.json
+    └── deploy-failure.json
+```
+
+## Signal fixtures
+
+- **Prometheus** — Valid Alertmanager v4 JSON: `version`, `status: "firing"`, `alerts[]` with `labels`, `annotations`, `startsAt`.
+- **Deploy** — `{ source: "deploy", provider, error_message, ... }`.
+- **PostHog** — `{ source: "posthog", funnel_id, drop_pct }`.
+- **GitHub** — Native webhook payloads for `deployment_status`, `check_run`, `workflow_run` with failure/error state.
+
+## Log fixtures
+
+Schema: `{ entries: [{ timestamp?, level?, message?, service? }] }`.
+
+- **high-error-rate.json** — Example error log entries (e.g. 500s, stack traces) that match the high-error-rate signal.
+- **latency-spike.json** — Slow queries, timeouts.
+- **deploy-failure.json** — Build errors, exit codes.
+
+Fixtures are designed to tell a coherent story so Devin can infer cause and suggest telemetry.
+
+## Demos vs fixtures
+
+- **Demos** — Built-in scenarios: `high-error-rate`, `latency-spike`, `deploy-failure`. We map each to a specific signal file and log scenario (e.g. deploy-failure → vercel-build-failure signal + deploy-failure logs).
+- **Fixtures** — Any signal file under `fixtures/signals/**/*.json`. You run by **name** (e.g. `high-error-rate`); we find the first matching `signals/**/high-error-rate.json` and use `logs/high-error-rate.json` for logs.
+
+Use **demos** for a one-command try; use **fixtures** when you add or customize scenario files.

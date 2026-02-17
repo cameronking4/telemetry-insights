@@ -1,0 +1,38 @@
+---
+title: Non-Goals
+description: What we explicitly do not do (MVP)
+---
+
+# Non-Goals
+
+We explicitly **do not** do the following for the MVP. This keeps scope clear and avoids over-promising.
+
+## No real-time telemetry ingestion
+
+We do not run a live pipeline that ingests metrics, traces, or logs in real time. We work from **structured payloads** you send (webhooks) or from **fixtures**. If you want triage triggered by a Prometheus alert, you send us the webhook payload when the alert fires.
+
+## No auto-remediation or auto-merge
+
+We do not apply patches or merge PRs automatically. Devin can propose patches and open PRs; **humans approve and merge**. This avoids liability and keeps control with the team.
+
+## No built-in logs providers (Datadog, Loki, etc.)
+
+We define a **logs adapter interface** and ship a **file-based adapter** (fixtures or user-placed files). We do not implement Datadog, Grafana Loki, or CloudWatch in the MVP. Those can be added later as separate adapters.
+
+## No Slack/Jira in MVP
+
+Posting summaries to Slack or creating Jira tickets is out of scope for the first version. The primary outputs are the markdown report and optional GitHub PRs. Slack/Jira can be v2.
+
+## No dashboard generation
+
+We do not generate or host dashboards. We support an optional **dashboard URL template** in config (e.g. Grafana) so you can point triage at existing dashboards; we don't create them.
+
+## No dry-run mode
+
+We removed `--dry-run` from the CLI. If you want to inspect the evidence without calling Devin, you can run the normalizer yourself or add a custom script; the shipped CLI focuses on the full run path.
+
+## No automatic PR creation by the app
+
+**Devin** creates PRs (patch and telemetry) when the playbook and config allow it. This codebase does **not** use Octokit to create PRs itself; we pass repo context and intent in the prompt, and Devin opens PRs. So "we" don't create PRs—Devin does, and we parse the session result for the PR URL.
+
+Summarized: we optimize for **fast, human-approved triage with a single evidence bundle and clear outputs**, not for real-time pipelines, auto-merge, or built-in integrations to every observability tool.

@@ -1,0 +1,74 @@
+---
+title: Project Structure
+description: Repo layout and key files
+---
+
+# Project Structure
+
+High-level layout of the **incident-triage** repo.
+
+## Root
+
+```
+incident-triage/
+├── package.json           # @devinnn/incident-triage, bin: incident-triage
+├── tsconfig.json
+├── incident-triage.yaml.example
+├── .env.example
+├── .gitignore
+├── README.md
+├── src/                   # TypeScript source
+├── fixtures/              # Signals and logs for POC
+├── docs/                  # Fumadocs docsite (Next.js)
+└── .github/workflows/     # GitHub Action(s)
+```
+
+## `src/`
+
+| Path | Purpose |
+|------|--------|
+| **index.ts** | Public API: runTriage, validateConfig, loadConfig, normalizePayload |
+| **cli.ts** | CLI: validate, run, status, webhook-server |
+| **config/schema.ts** | Zod schema for incident-triage.yaml |
+| **config/load.ts** | Load and parse YAML; loadConfigOrDefault for demos |
+| **config/validate.ts** | validateConfig (load and throw if invalid) |
+| **signals/types.ts** | TriggerKind, IncidentPayload, createIncidentId |
+| **signals/prometheus.ts** | Parse Alertmanager v4; filter firing |
+| **signals/posthog.ts** | Parse PostHog-style payload |
+| **signals/deploy.ts** | Parse generic deploy payload |
+| **signals/github.ts** | Parse deployment_status, check_run, workflow_run |
+| **signals/normalize.ts** | Route payload to parser; return IncidentPayload |
+| **normalizer/index.ts** | Orchestrate: commits + logs → evidence package |
+| **normalizer/commits.ts** | fetchCommitsFromGit, isGitRepo |
+| **normalizer/logs.ts** | loadLogsFromFile (file adapter) |
+| **normalizer/package.ts** | buildEvidencePackage → evidence.json |
+| **devin/v1.ts** | devinUploadAttachment, devinCreateSession, pollUntilTerminal, devinListSessions |
+| **devin/schemas.ts** | TriageReportSchema (JSON Schema) |
+| **devin/prompts.ts** | buildTriagePlaybookPrompt |
+| **outputs/triage-report.ts** | parseStructuredOutput, renderTriageReportMarkdown, writeTriageReport |
+| **evidence/bundle.ts** | (Optional) buildEvidenceBundle; currently we upload evidence.json only |
+| **github/client.ts** | parseRepo, getCommitComparison |
+| **webhook/server.ts** | startWebhookServer; POST /webhook/* routes |
+| **utils/exec.ts** | execCommand |
+| **utils/fs.ts** | ensureDir, readJsonFile, writeJsonFile, etc. |
+| **utils/git.ts** | resolveDefaultBaseHead, gitCommitList, gitDiffSummary |
+
+## `fixtures/`
+
+- **signals/** — One JSON file per scenario (prometheus, deploy, github, posthog).
+- **logs/** — One JSON file per scenario; schema `{ entries: [...] }`.
+
+## `docs/`
+
+- **content/docs/** — Fumadocs MDX content and **meta.json** (sidebar).
+- **app/** — Next.js app router (layout, docs layout, home).
+- **lib/source.ts** — Fumadocs source loader.
+- **source.config.ts** — Fumadocs MDX collections config.
+
+## `.github/workflows/`
+
+- **incident-triage.yml** — workflow_dispatch, repository_dispatch; runs CLI with payload or demo.
+
+## Build output
+
+- **dist/** — Compiled JS (from `tsc`). **dist/src/cli.js** is the binary entry.

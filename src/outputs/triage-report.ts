@@ -88,8 +88,8 @@ export function writeTriageReport(
     session.url
   );
 
-  fs.mkdirSync(path.dirname(reportPath), { recursive: true });
   const reportFilePath = path.join(reportPath, `${incidentId}.md`);
+  fs.mkdirSync(path.dirname(reportFilePath), { recursive: true });
   fs.writeFileSync(reportFilePath, markdown, "utf8");
 
   return { reportFilePath, parsed };

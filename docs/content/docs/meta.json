@@ -1,0 +1,27 @@
+{
+  "title": "Documentation",
+  "root": true,
+  "pages": [
+    "index",
+    "---Getting Started---",
+    "introduction",
+    "goals",
+    "non-goals",
+    "rationale",
+    "quick-start",
+    "---Guides---",
+    "architecture",
+    "signals",
+    "normalizer",
+    "devin-playbook",
+    "outputs",
+    "fixtures",
+    "---Configuration---",
+    "config-reference",
+    "---CLI---",
+    "cli-reference",
+    "---Development---",
+    "development",
+    "project-structure"
+  ]
+}

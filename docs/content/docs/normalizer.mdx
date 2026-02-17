@@ -1,0 +1,47 @@
+---
+title: Normalizer
+description: How we build the evidence bundle
+---
+
+# Normalizer
+
+The normalizer turns an **IncidentPayload** into a single **evidence.json** that we upload to Devin. It fetches commits and logs, then packages everything into one JSON file.
+
+## Inputs
+
+- **Incident** — From the signal layer (id, trigger, startsAt, labels, annotations).
+- **Config** — `normalizer.timeWindowMinutes`, `normalizer.commitDepth`, `normalizer.logsAdapter`.
+- **Options** — `logsScenario` (e.g. `high-error-rate`) to choose which log file to load; `fixturesRoot` for fixture paths.
+
+## Commits
+
+- **In a git repo:** We use local git: `resolveDefaultBaseHead`, `gitCommitList`, `gitDiffSummary` (with optional cwd). Base/head default to `GITHUB_BASE_SHA`/`GITHUB_SHA` in CI, or merge-base(main, HEAD)..HEAD locally.
+- **Not in a git repo:** We don’t call GitHub API from the normalizer by default; we set commits to `[]` and diffSummary to `"(no git repo)"`. The GitHub client exposes `getCommitComparison` for future use (e.g. webhook runner without a checkout).
+
+Result: **commits** (array of SHAs), **diffSummary** (string), **baseSha**, **headSha**.
+
+## Logs
+
+- **Adapter:** Interface only; current implementation is **file**.
+- **File adapter:** Loads from `fixtures/logs/<logsScenario>.json` (or a path if the scenario is an absolute path). Schema: `{ entries: [{ timestamp?, level?, message?, service? }] }`.
+- **Future:** Datadog, Loki, or other adapters can implement the same interface and be selected via config.
+
+## Package
+
+We write a single **evidence.json** into a temp directory (e.g. `os.tmpdir()/incident-triage-<incident_id>/evidence.json`) containing:
+
+- **incident** — Full IncidentPayload
+- **commits** — Array of commit SHAs
+- **diffSummary** — String
+- **baseSha** / **headSha**
+- **logs** — `{ entries: [...] }`
+
+No manifest file and no tar.gz; we upload **evidence.json** directly to Devin.
+
+## Output
+
+- **evidencePath** — Path to `evidence.json`
+- **dirPath** — Temp dir (for cleanup or debugging)
+- **evidence** — In-memory object (same structure) for the prompt builder
+
+The run flow uploads `evidencePath` as the sole attachment and passes `evidence` into the playbook prompt so Devin knows what’s in the attachment.

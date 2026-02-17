@@ -1,0 +1,38 @@
+---
+title: Outputs
+description: Reports and PRs
+---
+
+# Outputs
+
+After a Devin session completes, we produce a **markdown report** and optionally surface **PR links** that Devin opened. We do not create PRs ourselves.
+
+## Triage report (markdown)
+
+- **Location:** `config.outputs.reportPath/<incident_id>.md` (default: `.incident-triage/reports/`).
+- **Content:** Rendered from the session’s structured output:
+  - Summary (status, impacted services, root cause hypothesis, confidence, suggested action)
+  - Devin session URL
+  - PR URL (if any)
+  - Missing telemetry (list)
+  - Telemetry improvements (if any)
+
+We create the report directory if it doesn’t exist and write one file per incident.
+
+## Pull requests (by Devin)
+
+- **Patch PR** — Proposed fix for the incident. Devin opens it when the playbook and config allow it (`outputs.createPatchPr`). We only parse and log `pr.url` from the session.
+- **Telemetry PR** — Observability improvements (counters, spans, logs). Same idea: Devin may open it when `outputs.createTelemetryPr` is true; we surface the URL.
+
+We **do not** use Octokit in this repo to create branches or PRs. Devin has repo context from the prompt and creates PRs; we display the link in the CLI and in the report.
+
+## Human review
+
+- **requireHumanReview** in config is a flag for documentation/intent: all outputs are for human review. We never auto-merge.
+
+## Optional future outputs
+
+- **Slack** — Webhook POST with summary + report/PR links (not in MVP).
+- **Jira** — Create issue with summary (not in MVP).
+
+Current scope: **report on disk + PR link(s) in CLI and report.**

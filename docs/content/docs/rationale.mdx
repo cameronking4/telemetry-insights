@@ -1,0 +1,71 @@
+---
+title: Rationale & Opinionated Decisions
+description: Why we made key product and technical choices
+---
+
+# Rationale & Opinionated Decisions
+
+Why we built Incident Triage this way—and why we said no to alternatives.
+
+## Why fixture-first POC?
+
+You often don't have a Prometheus instance or a live app when evaluating a new tool. Fixtures let you:
+
+- **Validate the loop end-to-end** — Same code path as production: parse → normalize → Devin → report.
+- **Avoid flaky demos** — No dependency on real alerts or live systems.
+- **Onboard safely** — Teams can run `run --demo` or `run --fixture` before wiring webhooks.
+
+So we ship with real Alertmanager/PostHog-style JSON and hand-crafted log fixtures. "Run with fixtures first; wire real signals when someone cares."
+
+## Why Devin (and not a generic LLM call)?
+
+We need an **agent** that can read the evidence, reason over commits and logs, and optionally **open a PR**. A single LLM completion doesn't clone the repo or create branches. Devin gives us:
+
+- **Structured output** — One schema (root cause, confidence, action, telemetry gaps, PR URL).
+- **Session lifecycle** — Upload attachment, create session, poll until terminal; we get a stable API.
+- **PR creation** — Devin can open the patch/telemetry PR; we don't implement PR logic ourselves.
+
+So we're opinionated: we use Devin's API and playbook pattern, not a generic chat or custom agent framework.
+
+## Why one evidence.json (and no tar.gz)?
+
+We originally bundled evidence + manifest as a tar.gz. We switched to **uploading evidence.json directly** so that:
+
+- Devin gets a **single, obvious file** — No unzip or multi-file discovery.
+- **Fewer steps** — No tar/gzip on our side, no extraction on Devin's.
+- **Easier debugging** — You can inspect the exact JSON we send.
+
+The manifest was redundant (incident id/trigger are already in the evidence); dropping it and sending one file keeps the contract simple.
+
+## Why webhook server as primary (and GitHub native events)?
+
+- **Event-driven** — Alerts and deploy failures are events; webhooks fit that model. No polling.
+- **GitHub native** — Many teams already see Vercel/build failures in GitHub. Supporting `deployment_status`, `check_run`, and `workflow_run` means one webhook URL can receive everything GitHub sends; no need to add a curl step in every workflow.
+
+So we're opinionated: **webhook server first**, GitHub Action as an optional way to run the CLI when you don't want to host the server.
+
+## Why human always approves?
+
+- **Safety** — Patches can be wrong; we don't want the tool to merge to production automatically.
+- **Liability** — Clear boundary: the tool proposes, the team decides.
+- **Trust** — Teams adopt faster when they keep control. Auto-merge is a later phase, if ever.
+
+So we never auto-merge. Reports and PRs are for review.
+
+## Why no dry-run in the CLI?
+
+We removed `--dry-run` to keep the CLI surface small and to avoid maintaining two code paths (run vs dry-run). If you need to inspect the evidence without calling Devin, you can use the normalizer programmatically or add a one-off script. The shipped commands focus on: validate, run (demo/fixture/payload), status, webhook-server.
+
+## Why TypeScript and a single package?
+
+- **Consistency** — Same language as docdrift and many modern tooling repos; easy to copy/adapt Devin and GitHub helpers.
+- **Single package** — One repo, one `incident-triage` binary, one config file. No microservices for the MVP; you run the CLI or the webhook server.
+
+## Selling points (elevator pitch)
+
+- **"Alert → report in one flow"** — No more 30 minutes of log/diff gathering before the first hypothesis.
+- **"Try it with fixtures"** — No Prometheus required; run demos and fixtures locally.
+- **"Devin does the triage; you approve"** — Structured root cause and optional PRs, human in the loop.
+- **"One webhook for GitHub"** — deployment_status, check_run, workflow_run in one place; Vercel/GHA failures trigger triage automatically when you point GitHub at our webhook.
+
+These choices are intentional. We optimize for clarity, safety, and a short path from "alert" to "actionable report (and optional PRs)."

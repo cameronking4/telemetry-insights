@@ -1,0 +1,51 @@
+---
+title: Devin Playbook
+description: Deterministic triage steps and structured output
+---
+
+# Devin Playbook
+
+We send Devin one prompt that encodes a **deterministic playbook** and one **structured output schema**. The session runs until terminal; we parse the result for the report and optional PR URL.
+
+## Playbook steps (in the prompt)
+
+1. **Identify impacted services** from incident labels and log entries.
+2. **Correlate recent commits** (from the evidence attachment) with the incident time window.
+3. **Search log entries** in the attachment for errors, timeouts, or exceptions.
+4. **Propose a root cause hypothesis** and a **confidence score** (0–1).
+5. **Suggest an action:** `patch` (if you can propose a fix), `rollback` (if a recent deploy likely caused it), `investigate` (if unclear), or `none`.
+6. **List missing telemetry** — counters, spans, logs that would have made triage easier.
+7. **Optional:** If `createPatchPr` is true and there’s a clear fix, open **one** patch PR; include root cause and hypothesis in the description.
+8. **Optional:** If `createTelemetryPr` is true, list telemetry improvements in structured output; Devin may open a second PR for observability.
+
+We also pass: repo URL (from config), attachment URL(s), and a short evidence summary so Devin knows what’s in the file.
+
+## Structured output schema (TriageReportSchema)
+
+Devin is asked to fill:
+
+- **status** — e.g. ANALYZING → HYPOTHESIS → PATCH_PROPOSED or BLOCKED → DONE
+- **impactedServices** — string[]
+- **rootCauseHypothesis** — string
+- **confidence** — number 0–1
+- **suggestedAction** — `patch` | `rollback` | `investigate` | `none`
+- **missingTelemetry** — string[]
+- **telemetryImprovements** — optional array of `{ target, change, rationale }`
+- **pr** — optional `{ url?, title? }` (set when Devin opens a PR)
+
+We use this to write the markdown report and to log the PR link. We do **not** create PRs ourselves; Devin does, and we surface the URL.
+
+## Session lifecycle
+
+1. **Upload** — `POST /v1/attachments` with evidence.json → attachment URL.
+2. **Create** — `POST /v1/sessions` with prompt, `attachments: [url]`, `structured_output: { schema: TriageReportSchema }`, tags, metadata.
+3. **Poll** — `GET /v1/sessions/:id` every 5s until status is terminal or `pr.url` is present (with a 30 min timeout and “Still waiting…” every 30s).
+4. **Parse** — Read `structured_output` (or session-level pr_url/pull_request_url) and write the report.
+
+## Why one session and one schema?
+
+- **Simplicity** — One run, one report, one optional PR (or two if we ask for patch + telemetry).
+- **Cost** — Fewer sessions and clearer ACU usage.
+- **Consistency** — Same playbook every time; we don’t branch into multiple agent flows.
+
+The playbook is fixed in code (`buildTriagePlaybookPrompt`); only the evidence and config (createPatchPr, createTelemetryPr, repo URL) vary per run.

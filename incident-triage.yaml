@@ -29,8 +29,6 @@ normalizer:
   timeWindowMinutes: 30
   commitDepth: 10
   logsAdapter: file
-  dashboards:
-    urlTemplate: "https://grafana.example.com/d/{dashboard_id}?var-service={{service}}"
 
 outputs:
   createPatchPr: false

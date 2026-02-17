@@ -1,0 +1,36 @@
+---
+title: Introduction
+description: What Incident Triage is and who it's for
+---
+
+# Introduction
+
+**Incident Triage** (`@devinnn/incident-triage`) is an npm package that turns production alerts into AI-driven triage sessions. You get a root-cause report and optional patch/telemetry PRs—all with a human in the loop.
+
+## Who It's For
+
+- **Platform / SRE teams** that want to cut time-to-root-cause without handing over remediation to automation.
+- **Product teams** that use Prometheus, Vercel, GitHub Actions, or PostHog and want one place to trigger triage from any of them.
+- **Anyone** who wants to try the loop with **fixtures first**—no Prometheus or live app required.
+
+## How It Works (High Level)
+
+1. **Trigger** — A webhook hits your server (Prometheus, deploy, PostHog, or GitHub), or you run the CLI with a fixture or demo.
+2. **Normalize** — We parse the payload into a single `IncidentPayload`, fetch recent commits (git or GitHub API), and load logs (fixture file or future adapter).
+3. **Package** — We build one `evidence.json` with incident metadata, commits, diff summary, and log entries, then upload it to Devin.
+4. **Devin** — A session runs a deterministic triage playbook and returns structured output: root cause hypothesis, confidence, suggested action (patch / rollback / investigate), and missing telemetry.
+5. **Outputs** — We write a markdown report to disk and, if configured, Devin can open a patch PR and/or telemetry PR (you approve).
+
+## Key Principles
+
+- **Structured payloads only** — No live telemetry pipe; we work with what you send (webhooks, fixtures).
+- **Human always approves** — No auto-merge; reports and PRs are for review.
+- **Fixture-first POC** — Validate the loop with baked scenarios before connecting real systems.
+
+## What's Included
+
+- **CLI** — `validate`, `run --demo`, `run --fixture`, `run --payload`, `status`, `webhook-server`.
+- **Webhook server** — `POST /webhook/prometheus`, `/webhook/deploy`, `/webhook/posthog`, `/webhook/github` (native GitHub events for deployment_status, check_run, workflow_run).
+- **Config** — `incident-triage.yaml` for Devin, signals, services, normalizer, and outputs.
+
+Next: [Goals](/docs/goals) and [Non-goals](/docs/non-goals) spell out what we optimize for and what we leave out.

@@ -1,0 +1,41 @@
+---
+title: Incident Triage
+description: AI-driven incident triage — Alert → Devin → Root-cause report + telemetry PRs
+---
+
+# Incident Triage
+
+**Turn production alerts into AI-driven triage.** One flow: webhook or fixture → structured evidence → Devin session → root-cause report and optional patch/telemetry PRs. Human always approves. No auto-merge.
+
+<Cards>
+  <Card title="Quick Start" href="/docs/quick-start" />
+  <Card title="Architecture" href="/docs/architecture" />
+  <Card title="CLI Reference" href="/docs/cli-reference" />
+  <Card title="Configuration" href="/docs/config-reference" />
+</Cards>
+
+## Why Incident Triage?
+
+MTTR is dominated by **discovery and context-gathering**. Engineers spend 30+ minutes pulling logs, diffs, and dashboards before they can hypothesize. By then, the incident may have self-healed or gotten worse.
+
+We compress that loop:
+
+1. **Signal** — Prometheus, PostHog, deploy failures, or GitHub (deployment_status, check_run, workflow_run).
+2. **Normalize** — Fetch commits, logs, package into a single evidence bundle.
+3. **Devin** — Run a deterministic triage playbook; structured output: root cause, confidence, suggested action, telemetry gaps.
+4. **Outputs** — Markdown report, optional patch PR and telemetry PR (Devin opens them; you approve).
+
+**POC-first.** Ship with fixtures. Validate the loop before wiring real Prometheus. No production traffic required.
+
+## What You Get
+
+- **Structured evidence** — One JSON attachment (incident + commits + logs) for Devin.
+- **Deterministic playbook** — Identify services, correlate commits and logs, propose root cause and action.
+- **Human in the loop** — Reports and PRs for review; no auto-merge.
+- **Event-driven** — Webhook server as primary trigger; GitHub Action optional.
+
+## Next Steps
+
+- [Goals & non-goals](/docs/goals) — What we optimize for and what we explicitly avoid.
+- [Rationale & decisions](/docs/rationale) — Why fixture-first, why Devin, why no auto-remediation.
+- [Quick Start](/docs/quick-start) — Run your first demo in minutes.
